@@ -1,6 +1,7 @@
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
-import bcrypt from 'bcrypt';
+// import bcrypt from 'bcrypt';
+import {createHash} from 'crypto';  // Built-in Node.js module
 import postgres from 'postgres';
 import { z } from 'zod';
 import type { User } from '@/app/lib/definitions';
@@ -33,7 +34,14 @@ export const { auth, signIn, signOut } = NextAuth({
           const user = await getUser(email);
           if (!user) return null;
 
-          const passwordsMatch = await bcrypt.compare(password, user.password);
+          // const passwordsMatch = await bcrypt.compare(password, user.password);
+             // Hash the provided password with SHA-256
+             const hashedPassword = createHash('sha256')
+             .update(password)
+             .digest('hex');
+ 
+           // Compare the hashed passwords
+           const passwordsMatch = hashedPassword === user.password;
           if (passwordsMatch) return user;
         }
 
